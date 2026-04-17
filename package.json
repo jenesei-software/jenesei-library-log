@@ -1,0 +1,47 @@
+{
+  "author": "Cyril Strone",
+  "name": "@jenesei-software/jenesei-plugin-vite",
+  "version": "2.2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jenesei-software/jenesei-plugin-vite.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "build"
+  ],
+  "keywords": [
+    "vite"
+  ],
+  "exports": {
+    ".": {
+      "import": "./build/index.es.js",
+      "require": "./build/index.cjs.js",
+      "types": "./build/index.d.ts"
+    }
+  },
+  "scripts": {
+    "bundle-visualizer": "npx vite-bundle-visualizer",
+    "build": "vite build",
+    "build:main": "vite build",
+    "biome:lint": "biome lint src",
+    "biome:lint:check": "biome lint src --no-fix",
+    "biome:format": "biome format --write src",
+    "biome:format:check": "biome format src",
+    "biome:migrate": "biome migrate --write",
+    "biome:update": "biome update --write",
+    "changelog": "conventional-changelog -p eslint -i CHANGELOG.md -s -r 0"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.8",
+    "vite-plugin-dts": "^4.5.4",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}
