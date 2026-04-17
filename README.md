@@ -1,22 +1,22 @@
 # @jenesei-software/jenesei-library-log
 
-Легкая библиотека логирования для Node.js-проектов на TypeScript и JavaScript.
+A lightweight logging library for Node.js projects written in TypeScript or JavaScript.
 
-Поддерживает:
+Features:
 
-- разные типы логов из коробки;
-- цветной вывод в консоль в зависимости от типа;
-- `stdout` и `stderr` для разных сообщений;
-- кастомные типы логов;
-- отдельные экземпляры логгера под разные сервисы или модули.
+- built-in log types;
+- colored console output based on log type;
+- `stdout` and `stderr` routing per message type;
+- custom log types;
+- separate logger instances for different services or modules.
 
-## Установка
+## Installation
 
 ```bash
 npm i @jenesei-software/jenesei-library-log
 ```
 
-## Быстрый старт
+## Quick Start
 
 ```ts
 import { logger } from '@jenesei-software/jenesei-library-log';
@@ -28,7 +28,7 @@ logger.error('Unexpected error', { code: 'E_DB' });
 logger.debug('Payload', { page: 1, limit: 20 });
 ```
 
-Пример вывода:
+Example output:
 
 ```txt
 [2026-04-18T03:10:52.109Z] [INFO] Server started
@@ -36,9 +36,9 @@ logger.debug('Payload', { page: 1, limit: 20 });
 [2026-04-18T03:10:52.112Z] [WARN] Cache is disabled
 ```
 
-## Типы по умолчанию
+## Default Types
 
-В библиотеке уже есть типы:
+The library ships with these log types:
 
 - `info`
 - `success`
@@ -46,15 +46,15 @@ logger.debug('Payload', { page: 1, limit: 20 });
 - `error`
 - `debug`
 
-У каждого типа можно настроить:
+Each type can be configured with:
 
-- `label` - текст метки в консоли;
-- `color` - цвет;
-- `stream` - `stdout` или `stderr`;
-- `enabled` - включен ли тип;
-- `timestamp` - нужен ли timestamp у этого типа.
+- `label` - console label text;
+- `color` - output color;
+- `stream` - `stdout` or `stderr`;
+- `enabled` - whether the type is enabled;
+- `timestamp` - whether this type includes a timestamp.
 
-## Создание своего логгера
+## Creating a Custom Logger
 
 ```ts
 import { createLogger } from '@jenesei-software/jenesei-library-log';
@@ -68,13 +68,13 @@ appLogger.info('HTTP server is ready');
 appLogger.error('Cannot connect to Redis');
 ```
 
-Вывод будет таким:
+Output will look like this:
 
 ```txt
 [2026-04-18T03:12:41.000Z] [api] [INFO] HTTP server is ready
 ```
 
-## Переопределение стандартных типов
+## Overriding Default Types
 
 ```ts
 import { createLogger } from '@jenesei-software/jenesei-library-log';
@@ -95,9 +95,9 @@ logger.info('Custom info message');
 logger.debug('This line will not be printed');
 ```
 
-## Добавление своих типов
+## Adding Custom Types
 
-Можно добавить собственный тип при создании:
+You can add your own types when creating the logger:
 
 ```ts
 import { createLogger } from '@jenesei-software/jenesei-library-log';
@@ -119,7 +119,7 @@ logger.log('http', 'GET /users', 200);
 logger.log('audit', 'User deleted', { id: 42 });
 ```
 
-Или зарегистрировать новый тип позже:
+Or register a new type later:
 
 ```ts
 import { createLogger } from '@jenesei-software/jenesei-library-log';
@@ -135,9 +135,9 @@ logger.queue('Job started', { id: 'job-1' });
 logger.log('queue', 'Job finished');
 ```
 
-## Доступные цвета
+## Available Colors
 
-Поддерживаются значения:
+Supported values:
 
 - `black`
 - `red`
@@ -156,7 +156,7 @@ logger.log('queue', 'Job finished');
 - `brightCyan`
 - `brightWhite`
 
-Также можно передать свою функцию:
+You can also pass your own color function:
 
 ```ts
 import { createLogger } from '@jenesei-software/jenesei-library-log';
@@ -173,7 +173,7 @@ const logger = createLogger({
 logger.log('metric', 'Requests per second', 128);
 ```
 
-## Управление логированием во время работы
+## Runtime Control
 
 ```ts
 import { createLogger } from '@jenesei-software/jenesei-library-log';
@@ -184,18 +184,18 @@ logger.setTypeEnabled('debug', false);
 logger.setColorsEnabled(false);
 ```
 
-Полезные методы:
+Useful methods:
 
-- `logger.log(type, ...messages)` - вывести сообщение по имени типа;
-- `logger.registerType(type, config)` - добавить новый тип;
-- `logger.hasType(type)` - проверить, зарегистрирован ли тип;
-- `logger.getTypes()` - получить текущую карту типов;
-- `logger.setTypeEnabled(type, enabled)` - включить или выключить тип;
-- `logger.setColorsEnabled(enabled)` - включить или выключить цвета.
+- `logger.log(type, ...messages)` - log a message by type name;
+- `logger.registerType(type, config)` - add a new type;
+- `logger.hasType(type)` - check whether a type is registered;
+- `logger.getTypes()` - get the current type map;
+- `logger.setTypeEnabled(type, enabled)` - enable or disable a type;
+- `logger.setColorsEnabled(enabled)` - enable or disable colors.
 
-## Использование в Node.js
+## Using It in Node.js
 
-Пример для простого Node.js-сервиса:
+Example for a simple Node.js service:
 
 ```ts
 import { createServer } from 'node:http';
@@ -221,8 +221,8 @@ server.listen(3000, () => {
 });
 ```
 
-## Примечания
+## Notes
 
-- Цвета автоматически отключаются, если консоль не поддерживает TTY.
-- Если задана переменная окружения `NO_COLOR`, цветной вывод отключается.
-- Для ошибок и предупреждений по умолчанию используется `stderr`.
+- Colors are automatically disabled when the console does not support TTY.
+- If the `NO_COLOR` environment variable is set, colored output is disabled.
+- `error` and `warn` use `stderr` by default.
