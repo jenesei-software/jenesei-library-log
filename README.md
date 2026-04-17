@@ -1,12 +1,13 @@
 # @jenesei-software/jenesei-library-log
 
-A lightweight logging library for Node.js projects written in TypeScript or JavaScript.
+A lightweight logging library for Node.js and browser projects written in TypeScript or JavaScript.
 
 Features:
 
 - built-in log types;
 - colored console output based on log type;
 - `stdout` and `stderr` routing per message type;
+- browser-friendly console output;
 - custom log types;
 - separate logger instances for different services or modules.
 
@@ -221,8 +222,31 @@ server.listen(3000, () => {
 });
 ```
 
+## Using It in the Browser
+
+```ts
+import { createLogger } from '@jenesei-software/jenesei-library-log';
+
+const logger = createLogger({
+  name: 'web-app',
+  types: {
+    ui: {
+      label: 'UI',
+      color: 'brightMagenta',
+    },
+  },
+});
+
+logger.info('Application booted');
+logger.log('ui', 'Sidebar opened');
+logger.error('Unexpected client error', new Error('Network timeout'));
+```
+
+In the browser, the logger uses `console.log` and `console.error`, and built-in colors are rendered with `%c` styles.
+
 ## Notes
 
-- Colors are automatically disabled when the console does not support TTY.
+- In Node.js, colors are automatically disabled when the console does not support TTY.
 - If the `NO_COLOR` environment variable is set, colored output is disabled.
 - `error` and `warn` use `stderr` by default.
+- In the browser, `stdout` maps to `console.log` and `stderr` maps to `console.error`.

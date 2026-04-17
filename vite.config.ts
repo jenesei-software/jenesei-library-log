@@ -36,7 +36,7 @@ export default defineConfig(() => {
       },
       rollupOptions: {
         // Add external dependencies that shouldn't be bundled into the library
-        external: ['node:util'],
+        external: [],
         output: {
           globals: {},
         },

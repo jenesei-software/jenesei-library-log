@@ -1,5 +1,3 @@
-import { inspect } from 'node:util';
-
 const ANSI_RESET = '\u001B[0m';
 
 const ANSI_COLORS = {
@@ -20,6 +18,25 @@ const ANSI_COLORS = {
   brightCyan: '\u001B[96m',
   brightWhite: '\u001B[97m',
 } as const;
+
+const BROWSER_COLORS = {
+  black: '#000000',
+  red: '#dc2626',
+  green: '#16a34a',
+  yellow: '#ca8a04',
+  blue: '#2563eb',
+  magenta: '#c026d3',
+  cyan: '#0891b2',
+  white: '#f8fafc',
+  gray: '#6b7280',
+  brightRed: '#ef4444',
+  brightGreen: '#22c55e',
+  brightYellow: '#eab308',
+  brightBlue: '#3b82f6',
+  brightMagenta: '#d946ef',
+  brightCyan: '#06b6d4',
+  brightWhite: '#ffffff',
+} as const satisfies Record<keyof typeof ANSI_COLORS, string>;
 
 type LogStream = 'stdout' | 'stderr';
 
@@ -148,15 +165,6 @@ export function createLogger<TypeName extends string = DefaultLogType>(
     });
   };
 
-  const write = (stream: LogStream, line: string): void => {
-    if (stream === 'stderr') {
-      process.stderr.write(`${line}\n`);
-      return;
-    }
-
-    process.stdout.write(`${line}\n`);
-  };
-
   logger.hasType = (type: string): boolean => definitions.has(type);
 
   logger.getTypes = (): Readonly<Record<string, ResolvedLoggerTypeDefinition>> => {
@@ -216,10 +224,10 @@ export function createLogger<TypeName extends string = DefaultLogType>(
 
     segments.push(definition.label);
 
-    const prefix = colorize(`[${segments.join('] [')}]`, definition.color, colorsEnabled);
+    const prefix = `[${segments.join('] [')}]`;
     const content = messages.map(formatMessage).join(' ');
 
-    write(definition.stream, `${prefix} ${content}`);
+    writeLog(definition.stream, prefix, content, definition, colorsEnabled);
   };
 
   for (const [type, definition] of Object.entries(defaultLogTypes)) {
@@ -261,18 +269,141 @@ function formatMessage(message: unknown): string {
     return message;
   }
 
-  return inspect(message, {
-    breakLength: Infinity,
-    colors: false,
-    compact: true,
-    depth: 8,
-  });
+  if (message instanceof Error) {
+    return message.stack ?? `${message.name}: ${message.message}`;
+  }
+
+  if (typeof message === 'bigint' || typeof message === 'symbol') {
+    return String(message);
+  }
+
+  if (typeof message === 'function') {
+    return `[Function${message.name ? `: ${message.name}` : ''}]`;
+  }
+
+  if (message === undefined) {
+    return 'undefined';
+  }
+
+  return serializeValue(message);
 }
 
 function shouldUseColors(): boolean {
-  if ('NO_COLOR' in process.env) {
-    return false;
+  if (isNodeRuntime()) {
+    if ('NO_COLOR' in process.env) {
+      return false;
+    }
+
+    return Boolean(process.stdout?.isTTY);
   }
 
-  return Boolean(process.stdout.isTTY);
+  if (isBrowserRuntime()) {
+    return true;
+  }
+
+  return false;
+}
+
+function isNodeRuntime(): boolean {
+  return typeof process !== 'undefined' && Boolean(process.versions?.node);
+}
+
+function isBrowserRuntime(): boolean {
+  return (
+    typeof globalThis === 'object' &&
+    'console' in globalThis &&
+    !isNodeRuntime()
+  );
+}
+
+function serializeValue(value: unknown): string {
+  try {
+    return JSON.stringify(
+      value,
+      createJsonReplacer(),
+    );
+  } catch {
+    return String(value);
+  }
+}
+
+function createJsonReplacer() {
+  const seen = new WeakSet<object>();
+
+  return (_key: string, value: unknown) => {
+    if (typeof value === 'bigint') {
+      return value.toString();
+    }
+
+    if (typeof value === 'function') {
+      return `[Function${value.name ? `: ${value.name}` : ''}]`;
+    }
+
+    if (typeof value === 'symbol') {
+      return value.toString();
+    }
+
+    if (value instanceof Error) {
+      return {
+        name: value.name,
+        message: value.message,
+        stack: value.stack,
+      };
+    }
+
+    if (value && typeof value === 'object') {
+      if (seen.has(value)) {
+        return '[Circular]';
+      }
+
+      seen.add(value);
+    }
+
+    return value;
+  };
+}
+
+function writeLog(
+  stream: LogStream,
+  prefix: string,
+  content: string,
+  definition: ResolvedLoggerTypeDefinition,
+  colorsEnabled: boolean,
+): void {
+  if (isNodeRuntime() && process.stdout && process.stderr) {
+    writeNode(stream, `${colorize(prefix, definition.color, colorsEnabled)} ${content}`);
+    return;
+  }
+
+  writeConsole(stream, prefix, content, definition, colorsEnabled);
+}
+
+function writeNode(stream: LogStream, line: string): void {
+  if (stream === 'stderr') {
+    process.stderr.write(`${line}\n`);
+    return;
+  }
+
+  process.stdout.write(`${line}\n`);
+}
+
+function writeConsole(
+  stream: LogStream,
+  prefix: string,
+  content: string,
+  definition: ResolvedLoggerTypeDefinition,
+  colorsEnabled: boolean,
+): void {
+  const method = stream === 'stderr' ? console.error : console.log;
+
+  if (!colorsEnabled || !definition.color || typeof definition.color === 'function') {
+    method(`${prefix} ${content}`);
+    return;
+  }
+
+  method(
+    `%c${prefix}%c ${content}`,
+    `color: ${BROWSER_COLORS[definition.color]}; font-weight: 700;`,
+    '',
+  );
 }
