@@ -22,6 +22,7 @@
     }
   },
   "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
     "bundle-visualizer": "npx vite-bundle-visualizer",
     "build": "vite build",
     "build:main": "vite build",
