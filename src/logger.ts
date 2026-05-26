@@ -42,9 +42,7 @@ type LogStream = 'stdout' | 'stderr';
 
 export type LoggerColor = keyof typeof ANSI_COLORS;
 
-export type LoggerColorizer =
-  | LoggerColor
-  | ((message: string) => string);
+export type LoggerColorizer = LoggerColor | ((message: string) => string);
 
 export type LoggerTypeDefinition = {
   color?: LoggerColorizer;
@@ -62,10 +60,7 @@ export type ResolvedLoggerTypeDefinition = {
   timestamp: boolean;
 };
 
-export type LoggerTypeMap<TypeName extends string = string> = Record<
-  TypeName,
-  LoggerTypeDefinition
->;
+export type LoggerTypeMap<TypeName extends string = string> = Record<TypeName, LoggerTypeDefinition>;
 
 export type CreateLoggerOptions<TypeName extends string = DefaultLogType> = {
   colors?: boolean;
@@ -88,11 +83,9 @@ type LoggerCore<TypeName extends string> = {
   setTypeEnabled: (type: TypeName | string, enabled: boolean) => void;
 };
 
-export type Logger<TypeName extends string> = LoggerCore<TypeName> &
-  Record<TypeName, LogMethod>;
+export type Logger<TypeName extends string> = LoggerCore<TypeName> & Record<TypeName, LogMethod>;
 
-export type LoggerInstance<TypeName extends string = DefaultLogType> =
-  Logger<TypeName>;
+export type LoggerInstance<TypeName extends string = DefaultLogType> = Logger<TypeName>;
 
 export const defaultLogTypes = {
   debug: {
@@ -192,10 +185,7 @@ export function createLogger<TypeName extends string = DefaultLogType>(
     type: NextTypeName,
     definition: LoggerTypeDefinition = {},
   ): Logger<NextTypeName | TypeName | DefaultLogType> => {
-    definitions.set(
-      type,
-      parseLogTypeDefinition(type, definition, globalTimestamp),
-    );
+    definitions.set(type, parseLogTypeDefinition(type, definition, globalTimestamp));
     ensureMethod(type);
 
     return logger as Logger<NextTypeName | TypeName | DefaultLogType>;
@@ -231,10 +221,7 @@ export function createLogger<TypeName extends string = DefaultLogType>(
   };
 
   for (const [type, definition] of Object.entries(defaultLogTypes)) {
-    logger.registerType(
-      type,
-      definition as LoggerTypeDefinition,
-    );
+    logger.registerType(type, definition as LoggerTypeDefinition);
   }
 
   if (options.types) {
@@ -248,11 +235,7 @@ export function createLogger<TypeName extends string = DefaultLogType>(
 
 export const logger = createLogger();
 
-function colorize(
-  message: string,
-  color: LoggerColorizer | undefined,
-  enabled: boolean,
-): string {
+function colorize(message: string, color: LoggerColorizer | undefined, enabled: boolean): string {
   if (!enabled || !color) {
     return message;
   }
@@ -309,19 +292,12 @@ function isNodeRuntime(): boolean {
 }
 
 function isBrowserRuntime(): boolean {
-  return (
-    typeof globalThis === 'object' &&
-    'console' in globalThis &&
-    !isNodeRuntime()
-  );
+  return typeof globalThis === 'object' && 'console' in globalThis && !isNodeRuntime();
 }
 
 function serializeValue(value: unknown): string {
   try {
-    return JSON.stringify(
-      value,
-      createJsonReplacer(),
-    );
+    return JSON.stringify(value, createJsonReplacer());
   } catch {
     return String(value);
   }
@@ -401,9 +377,5 @@ function writeConsole(
     return;
   }
 
-  method(
-    `%c${prefix}%c ${content}`,
-    `color: ${BROWSER_COLORS[definition.color]}; font-weight: 700;`,
-    '',
-  );
+  method(`%c${prefix}%c ${content}`, `color: ${BROWSER_COLORS[definition.color]}; font-weight: 700;`, '');
 }
