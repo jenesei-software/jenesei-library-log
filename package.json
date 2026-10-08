@@ -22,17 +22,15 @@
     }
   },
   "scripts": {
+    "check": "biome check src && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json",
-    "bundle-visualizer": "npx vite-bundle-visualizer",
     "build": "vite build",
     "build:main": "vite build",
+    "bundle-visualizer": "npx vite-bundle-visualizer",
     "biome:lint": "biome lint src",
-    "biome:lint:check": "biome lint src",
     "biome:format": "biome format --write src",
-    "biome:format:check": "biome format src",
     "biome:migrate": "biome migrate --write",
-    "biome:update": "biome update --write",
-    "changelog": "conventional-changelog -p eslint -i CHANGELOG.md -s -r 0"
+    "biome:update": "biome update --write"
   },
   "dependencies": {},
   "devDependencies": {
