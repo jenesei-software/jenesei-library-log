@@ -11,6 +11,10 @@ Features:
 - custom log types;
 - separate logger instances for different services or modules.
 
+## 🚀 ACTUAL VERSIONS
+
+- `2.0.0`
+
 ## Installation
 
 ```bash
