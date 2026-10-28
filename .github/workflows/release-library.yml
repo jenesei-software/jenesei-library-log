@@ -56,6 +56,10 @@ on:
         default: "angular"
         type: string
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   release:
     uses: jenesei-software/.github/.github/workflows/release-library.yml@main
